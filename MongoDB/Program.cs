@@ -19,7 +19,7 @@ namespace MongoDB
 
 
             var dbClient = new MongoClient("mongodb://127.0.0.1:27017");
-
+            
             IMongoDatabase db = dbClient.GetDatabase("OTUS");
             var users = db.GetCollection<User>("Users");
 
@@ -35,7 +35,8 @@ namespace MongoDB
                 }
 
             });
-
+            var indexKeysDefinition = Builders<User>.IndexKeys.Ascending(x => x.user_name);
+             users.Indexes.CreateOne(new CreateIndexModel<User>(indexKeysDefinition));
             var u = users.Find<User>(x => x.company.startwork >= new DateTime(2002, 1, 1)).ToList();
 
             Console.ReadKey();

@@ -1,6 +1,7 @@
 ﻿using Cassandra;
 using Cassandra.Mapping;
 using System;
+using System.Collections.Generic;
 using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -12,22 +13,17 @@ namespace CassTest
         //  https://github.com/Azure-Samples/azure-cosmos-db-cassandra-dotnet-getting-started/tree/master/CassandraQuickStartSample
         // docker run --name cassandra -p 9042:9042  -d cassandra
         // Cassandra Cluster Configs      
-        private const string UserName = "<FILLME>";
-        private const string Password = "<FILLME>";
-        private const string CassandraContactPoint = "127.0.0.1";  // DnsName  
-        private static int CassandraPort = 9042;
+        //private const string UserName = "<FILLME>";
+       // private const string Password = "<FILLME>";
+       // private const string CassandraContactPoint = "127.0.0.1";  // DnsName  
+        //private static int CassandraPort = 9042;
 
         public static void Main(string[] args)
         {
             // Connect to cassandra cluster  (Cassandra API on Azure Cosmos DB supports only TLSv1.2)
-            var options = new SSLOptions(SslProtocols.Tls12, true, ValidateServerCertificate);
-            options.SetHostNameResolver((ipAddress) => CassandraContactPoint);
-            Cluster cluster = Cluster.Builder()
-                //.WithCredentials(UserName, Password)
-                //.WithPort(CassandraPort)
-                .AddContactPoint(CassandraContactPoint)
-                //.WithSSL(options)
-                .Build();
+           // var options = new SSLOptions(SslProtocols.Tls12, true, ValidateServerCertificate);
+          //  options.SetHostNameResolver((ipAddress) => CassandraContactPoint);
+            Cluster cluster = Cluster.Builder().AddContactPoint("localhost").Build();
             ISession session = cluster.Connect();
 
             // Creating KeySpace and table
@@ -50,10 +46,12 @@ namespace CassTest
 
             Console.WriteLine("Select ALL");
             Console.WriteLine("-------------------------------");
-            foreach (User user in mapper.Fetch<User>("Select * from user"))
+            foreach (User u in mapper.Fetch<User>("Select * from user"))
             {
-                Console.WriteLine(user);
+                Console.WriteLine(u);
             }
+            IEnumerable<User> users = mapper.Fetch<User>("Select * from user");
+            var user = mapper.FirstOrDefault<User>("Select * from user where user_id = ?", 3);
 
             Console.WriteLine("Getting by id 3");
             Console.WriteLine("-------------------------------");
@@ -83,12 +81,14 @@ namespace CassTest
         }
     }
 
-    public class User
+    public partial class User
     {
         public int user_id { get; set; }
-        public String user_name { get; set; }
-        public String user_bcity { get; set; }
-
+        public string user_name { get; set; }
+        public string user_bcity { get; set; } 
+    }
+    public partial class User
+    {
         public User(int user_id, String user_name, String user_bcity)
         {
             this.user_id = user_id;

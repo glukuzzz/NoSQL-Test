@@ -14,34 +14,50 @@ namespace Redis
             //docker run --name redis -p 6379:6379 -d redis
 
             var redis = ConnectionMultiplexer.Connect("localhost");
-
             var db = redis.GetDatabase();
             
-
             db.StringSet("testKey", "test1");
             string str = db.StringGet("testKey");
             string str1 = db.StringGet("testKey3").ToString() ?? "no data";
             Console.WriteLine(str);
             Console.WriteLine(str1);
-            db.HashSet(new RedisKey("p"), new HashEntry[] { new HashEntry(new RedisValue("hhhh"), new RedisValue("44444"))});
-            db.HashSet(new RedisKey("p"), new HashEntry[] { new HashEntry(new RedisValue("zzz"), new RedisValue("4555")) });
-
-
-            var t = db.HashGetAll(new RedisKey("p"));
             
-           foreach(var y in t)  Console.WriteLine(y.Name + " " + y.Value);
-           
+           // db.HashSet("hashset", new [] {new HashEntry( "entry1", "4555" ) , new HashEntry("entry2", "4555") });
+           // db.HashSet("hashset", "entry3", "777");
+           // var keys = db.HashKeys("hashset");
+           // db.HashDelete("hashset","entry1");
+           // var data = db.HashGetAll("hashset");
 
-            db.ListLeftPush("u", "ggg");
-            db.ListLeftPush("u", "ppp");
+            
+           //foreach(var y in data)  Console.WriteLine(y.Name + " " + y.Value);
 
-            var listdata = db.ListRange("u");
+            //db.SetAdd(new RedisKey("set_key"), new RedisValue("value1"));
+            //db.SetAdd("set_key", "value1");
+            //var y = db.SetMembers("set_key");
+            //var set_items = db.SetMembers(new RedisKey("set_key"));
+            //var set_random_item = db.SetPop(new RedisKey("set_key"));
+            //db.ListLeftPush("u", "ggg");
+            //db.ListRightPush("u", "ppp");
 
-            foreach (var y in listdata)
-            {
-                Console.WriteLine(y);
-            }
+            //var listdata = db.ListRange("list");
 
+            //var item = db.ListRightPop("list");
+
+            //foreach (var y in listdata)
+            //{
+            //    Console.WriteLine(y);
+            //}
+            var transaction = db.CreateTransaction();
+            transaction.HashSetAsync("hashset", new[] { new HashEntry("entry1", "4555"), new HashEntry("entry2", "4555") });
+            transaction.HashSetAsync("hashset", "entry3", "777");
+            transaction.HashDeleteAsync("hashset", "entry1");
+            transaction.Execute();
+            var data = db.HashGetAll("hashset");
+
+            foreach (var y in data) Console.WriteLine(y.Name + " " + y.Value);
+
+            //VAR TRAN
+            //   db.TRA
 
             Console.ReadKey();
 

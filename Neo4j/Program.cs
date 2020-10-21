@@ -17,23 +17,17 @@ namespace Neo4j
             var url = "http://localhost:7474";
             var user = "neo4j";
             var password = "test";
-            var client = new GraphClient(new Uri(url), user, password);
+            var client = new GraphClient(new Uri("http://localhost:7474"), "neo4j", "test");
             client.ConnectAsync().Wait();
            var yy = client.IsConnected;
 
 
 
-            var query = client.Cypher
-               .Match("(m:Movie)<-[:ACTED_IN]-(a:Person)")
-               .Return((m, a) => new
-               {
-                   movie = m.As<Movie>().title,
-                   cast = Return.As<string>("collect(a.name)")
-               })
-               .Limit(100);
-
-            //You can see the cypher query here when debugging
+            var query = client.Cypher.Match("(m:Movie)<-[:ACTED_IN]-(a:Person)")
+               .Return((m, a) => new  { movie = m.As<Movie>().title, cast = Return.As<string>("collect(a.name)")  }).Limit(100);
             var data = query.ResultsAsync.Result.ToList();
+            //You can see the cypher query here when debugging
+            
 
             var nodes = new List<NodeResult>();
             var rels = new List<object>();

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LiteDB
+namespace LiteDBs
 {
     class Program
     {
@@ -12,9 +12,12 @@ namespace LiteDB
         {
 
             //очень удобно, если чего нет - создаст, избавлен от лишнего, про сравнению с mongo при томже функицонале, правильно сохраняет дату и время
-            var db = new LiteDatabase(@"MyData.db");
+            var db = new LiteDB.LiteDatabase(@"MyData.db");
             var users = db.GetCollection<User>("Users");
 
+            //users.DeleteAll();
+            users.EnsureIndex(x => new User { user_name = x.user_name }, true);
+            users.EnsureIndex(x => new User { _id = x._id }, true);
             users.Insert(new User
             {
                 age = 43,
@@ -25,10 +28,19 @@ namespace LiteDB
                     name = "Bueng",
                     startwork = DateTime.Now
                 }
-
             });
+            var m = users.Find(x => x.company.startwork >= new DateTime(2002, 1, 1)).ToList();
+            var sigleUser = users.FindOne(x => x.user_name == "Zaza");
+            
+            users.DropIndex("usernameusername");
+            users.DeleteMany(x => x.user_name == "Zaza");
+            users.DeleteAll();
 
-            var u = users.Find(x => x.company.startwork >= new DateTime(2002, 1, 1)).ToList();
+            sigleUser.company.name = "MegaHard";
+            users.Update(sigleUser);
+            users.UpdateMany(x => new User { age = 3 }, x => x.age > 20);
+            users.DeleteAll();
+
             Console.WriteLine();
         }
     }
